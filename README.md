@@ -2,7 +2,7 @@
 
 Ein intelligenter Snack-Automat Controller für Tyson über Arduino Nano 33 IoT via Raspberry Pi.
 
-![Treat Commander Mockup](mockup-treat-commander.png)
+![Treat Commander Mockup](https://github.com/pepperonas/treat-commander/blob/main/public/mockup-treat-commander.png)
 
 ## 📱 Features
 
