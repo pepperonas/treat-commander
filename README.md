@@ -7,6 +7,7 @@ Ein intelligenter Snack-Automat Controller für Tyson über Arduino Nano 33 IoT 
 ## 📱 Features
 
 - **Einfache Bedienung**: Ein-Klick Snack-Ausgabe über Web-Interface
+- **🦴 Knochen-Regen Animation**: 4 Sekunden spektakuläre Bone-Rain Animation bei jedem Snack
 - **Responsive Design**: Optimiert für Desktop und Mobile
 - **Arduino Integration**: Direkte USB Serial-Kommunikation mit Arduino Nano 33 IoT
 - **Status Monitoring**: Echtzeit-Überwachung der Arduino-Verbindung
@@ -166,9 +167,10 @@ Die App sucht automatisch nach Arduino auf folgenden Ports:
 ## 🐕 Verwendung
 
 1. **Snack ausgeben**: Großen orangenen Button drücken
-2. **Status prüfen**: Arduino-Verbindung wird automatisch überwacht
-3. **Statistiken**: Anzahl ausgegebener Snacks und letzte Ausgabe
-4. **Mobile**: App auf Smartphone installieren für schnellen Zugriff
+2. **🦴 Knochen-Regen genießen**: Nach erfolgreicher Ausgabe startet automatisch eine 4-sekündige Animation mit fallenden Knochen, Steaks und Fleisch in verschiedenen Größen und Animationsstilen
+3. **Status prüfen**: Arduino-Verbindung wird automatisch überwacht
+4. **Statistiken**: Anzahl ausgegebener Snacks und letzte Ausgabe
+5. **Mobile**: App auf Smartphone installieren für schnellen Zugriff
 
 ## 🛠️ Troubleshooting
 

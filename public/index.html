@@ -405,6 +405,116 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Knochen-Regen Animation für Tyson */
+        .bone-rain-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .bone {
+            position: absolute;
+            font-size: 2rem;
+            color: var(--accent-orange);
+            animation: boneFall linear infinite;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            filter: drop-shadow(0 0 5px rgba(228, 168, 83, 0.6));
+        }
+
+        @keyframes boneFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Verschiedene Knochen-Größen */
+        .bone.small {
+            font-size: 1.2rem;
+            animation-duration: 3s;
+        }
+
+        .bone.medium {
+            font-size: 1.8rem;
+            animation-duration: 3.5s;
+        }
+
+        .bone.large {
+            font-size: 2.5rem;
+            animation-duration: 4s;
+        }
+
+        .bone.extra-large {
+            font-size: 3rem;
+            animation-duration: 4.5s;
+        }
+
+        /* Verschiedene Rotations-Richtungen */
+        .bone.rotate-reverse {
+            animation-name: boneFallReverse;
+        }
+
+        @keyframes boneFallReverse {
+            0% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+        }
+
+        /* Verschiedene Knochen-Arten */
+        .bone.bounce {
+            animation-name: boneBounce;
+        }
+
+        @keyframes boneBounce {
+            0% {
+                transform: translateY(-100px) rotate(0deg) scale(0.8);
+                opacity: 0;
+            }
+            20% {
+                transform: translateY(20vh) rotate(72deg) scale(1.1);
+                opacity: 1;
+            }
+            40% {
+                transform: translateY(40vh) rotate(144deg) scale(0.9);
+            }
+            60% {
+                transform: translateY(60vh) rotate(216deg) scale(1.05);
+            }
+            80% {
+                transform: translateY(80vh) rotate(288deg) scale(0.95);
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg) scale(0.7);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -563,6 +673,7 @@
 
                     if (result.success) {
                         this.showNotification(result.message, 'success');
+                        this.startBoneRain(); // 🦴 Knochen-Regen für Tyson!
                         this.updateStatus(); // Refresh status
                     } else {
                         this.showNotification(result.message, 'error');
@@ -597,6 +708,71 @@
                 setInterval(() => {
                     this.updateStatus();
                 }, 5000);
+            }
+
+            // Knochen-Regen Animation für Tyson
+            startBoneRain() {
+                // Container für die Animation erstellen
+                let container = document.getElementById('boneRainContainer');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'boneRainContainer';
+                    container.className = 'bone-rain-container';
+                    document.body.appendChild(container);
+                }
+
+                const duration = 4000; // 4 Sekunden
+                const boneCount = 25; // Anzahl der Knochen
+                const boneTypes = ['🦴', '🍖', '🥩']; // Verschiedene Knochen-Arten
+                const sizes = ['small', 'medium', 'large', 'extra-large'];
+                const animations = ['', 'rotate-reverse', 'bounce'];
+
+                // Knochen erstellen
+                for (let i = 0; i < boneCount; i++) {
+                    setTimeout(() => {
+                        const bone = document.createElement('div');
+                        bone.className = 'bone';
+                        
+                        // Zufällige Eigenschaften
+                        const boneType = boneTypes[Math.floor(Math.random() * boneTypes.length)];
+                        const size = sizes[Math.floor(Math.random() * sizes.length)];
+                        const animationType = animations[Math.floor(Math.random() * animations.length)];
+                        
+                        bone.textContent = boneType;
+                        bone.classList.add(size);
+                        if (animationType) bone.classList.add(animationType);
+                        
+                        // Zufällige Position und Timing
+                        bone.style.left = Math.random() * 100 + 'vw';
+                        bone.style.animationDelay = Math.random() * 0.5 + 's';
+                        bone.style.animationDuration = (3 + Math.random() * 2) + 's';
+                        
+                        // Zufällige Farben für Abwechslung
+                        const colors = [
+                            'var(--accent-orange)',
+                            '#d97706',
+                            '#f59e0b',
+                            '#fbbf24'
+                        ];
+                        bone.style.color = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        container.appendChild(bone);
+                        
+                        // Knochen nach der Animation entfernen
+                        setTimeout(() => {
+                            if (bone.parentNode) {
+                                bone.parentNode.removeChild(bone);
+                            }
+                        }, 5000);
+                    }, Math.random() * duration * 0.8); // Zeitversetzt spawnen
+                }
+
+                // Container nach der Animation aufräumen
+                setTimeout(() => {
+                    if (container && container.parentNode) {
+                        container.parentNode.removeChild(container);
+                    }
+                }, duration + 2000);
             }
         }
 
