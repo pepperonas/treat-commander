@@ -265,6 +265,53 @@
             transform: none;
         }
 
+        /* Drückerplatte Control */
+        .plate-control {
+            margin-top: var(--spacing-6);
+            text-align: center;
+        }
+
+        .plate-toggle {
+            width: 100%;
+            padding: var(--spacing-4) var(--spacing-6);
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            margin-bottom: var(--spacing-3);
+        }
+
+        .plate-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .plate-toggle:active {
+            transform: translateY(0);
+        }
+
+        .plate-toggle.enabled {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #16a34a 100%);
+        }
+
+        .plate-toggle:disabled {
+            background: var(--treat-inactive);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .plate-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.4;
+        }
+
         .treat-stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -545,6 +592,14 @@
                     <span id="buttonText">🦴 Snack ausgeben</span>
                 </button>
 
+                <!-- Drückerplatte Toggle Button -->
+                <div class="plate-control">
+                    <button class="plate-toggle" id="plateToggleBtn" onclick="togglePlate()">
+                        <span id="plateToggleText">🔴 Drückerplatte gesperrt</span>
+                    </button>
+                    <p class="plate-description">Tyson kann sich selbst Treats holen wenn entsperrt</p>
+                </div>
+
                 <div class="treat-stats">
                     <div class="stat-item">
                         <div class="stat-value" id="totalTreats">0</div>
@@ -573,6 +628,10 @@
                         <span class="status-value" id="arduinoResponse">-</span>
                     </div>
                     <div class="status-row">
+                        <span class="status-label">Drückerplatte</span>
+                        <span class="status-value" id="plateStatus">Gesperrt</span>
+                    </div>
+                    <div class="status-row">
                         <span class="status-label">Server</span>
                         <span class="status-value">Online</span>
                     </div>
@@ -593,7 +652,8 @@
                     connected: false,
                     total_treats: 0,
                     last_dispense: null,
-                    arduino_response: ""
+                    arduino_response: "",
+                    plate_enabled: false
                 };
                 this.init();
             }
@@ -651,6 +711,31 @@
                 // Button state
                 const dispenseBtn = document.getElementById('dispenseBtn');
                 dispenseBtn.disabled = !this.status.connected;
+                
+                // Plate toggle button state
+                const plateToggleBtn = document.getElementById('plateToggleBtn');
+                const plateToggleText = document.getElementById('plateToggleText');
+                const plateStatus = document.getElementById('plateStatus');
+                
+                if (this.status.connected) {
+                    plateToggleBtn.disabled = false;
+                    if (this.status.plate_enabled) {
+                        plateToggleBtn.classList.add('enabled');
+                        plateToggleText.textContent = '🟢 Drückerplatte entsperrt';
+                        plateStatus.textContent = 'Entsperrt 🟢';
+                        plateStatus.style.color = 'var(--accent-green)';
+                    } else {
+                        plateToggleBtn.classList.remove('enabled');
+                        plateToggleText.textContent = '🔴 Drückerplatte gesperrt';
+                        plateStatus.textContent = 'Gesperrt 🔴';
+                        plateStatus.style.color = 'var(--accent-red)';
+                    }
+                } else {
+                    plateToggleBtn.disabled = true;
+                    plateToggleText.textContent = '⚫ Arduino offline';
+                    plateStatus.textContent = 'Offline';
+                    plateStatus.style.color = 'var(--text-secondary)';
+                }
             }
 
             async dispenseTreat() {
@@ -774,11 +859,56 @@
                     }
                 }, duration + 2000);
             }
+
+            async togglePlate() {
+                const button = document.getElementById('plateToggleBtn');
+                const buttonText = document.getElementById('plateToggleText');
+                const originalText = buttonText.textContent;
+                
+                // Disable button and show loading
+                button.disabled = true;
+                buttonText.innerHTML = '<span class="loading"></span> Ändere Status...';
+
+                try {
+                    const response = await fetch('/api/plate/toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.showNotification(result.message, 'success');
+                        
+                        // Update local status immediately for better UX
+                        this.status.plate_enabled = result.plate_enabled;
+                        this.updateUI(); // Force immediate UI update
+                    } else {
+                        this.showNotification(result.message, 'error');
+                    }
+
+                } catch (error) {
+                    console.error('Plate toggle failed:', error);
+                    this.showNotification('Fehler beim Ändern der Drückerplatte', 'error');
+                } finally {
+                    // Re-enable button after delay
+                    setTimeout(() => {
+                        button.disabled = false;
+                        this.updateStatus(); // Force full status refresh
+                    }, 1000);
+                }
+            }
         }
 
         // Global functions for HTML onclick handlers
         function dispenseTreat() {
             commander.dispenseTreat();
+        }
+
+        function togglePlate() {
+            commander.togglePlate();
         }
 
         // Initialize app when DOM is loaded

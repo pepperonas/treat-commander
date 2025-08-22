@@ -1,8 +1,8 @@
 module.exports = {
   apps: [{
     name: 'treat-commander',
-    script: 'server.py',
-    interpreter: 'python3',
+    script: '/home/pi/apps/treat-commander/venv/bin/python',
+    args: 'server.py',
     cwd: '/home/pi/apps/treat-commander',
     instances: 1,
     autorestart: true,
@@ -11,13 +11,13 @@ module.exports = {
     env: {
       PORT: 5007,
       FLASK_ENV: 'production',
-      ARDUINO_PORT: '/dev/ttyACM1'
+      ARDUINO_PORT: '/dev/ttyACM0'
     },
     env_production: {
       NODE_ENV: 'production',
       PORT: 5007,
       FLASK_ENV: 'production',
-      ARDUINO_PORT: '/dev/ttyACM1'
+      ARDUINO_PORT: '/dev/ttyACM0'
     },
     error_file: '/home/pi/apps/treat-commander/logs/error.log',
     out_file: '/home/pi/apps/treat-commander/logs/out.log',

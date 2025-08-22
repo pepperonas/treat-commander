@@ -7,7 +7,10 @@ Ein intelligenter Snack-Automat Controller für Tyson über Arduino Nano 33 IoT 
 ## 📱 Features
 
 - **Einfache Bedienung**: Ein-Klick Snack-Ausgabe über Web-Interface
+- **🐕 Tysons Drückerplatte**: Selbstbedienungs-System - Tyson kann sich eigenständig Treats holen
+- **🔴 Sicherheitskontrolle**: Toggle-Button zum Sperren/Entsperren der Drückerplatte
 - **🦴 Knochen-Regen Animation**: 4 Sekunden spektakuläre Bone-Rain Animation bei jedem Snack
+- **📍 Status-LED**: Rote LED zeigt an, ob Drückerplatte entsperrt ist
 - **Responsive Design**: Optimiert für Desktop und Mobile
 - **Arduino Integration**: Direkte USB Serial-Kommunikation mit Arduino Nano 33 IoT
 - **Status Monitoring**: Echtzeit-Überwachung der Arduino-Verbindung
@@ -16,8 +19,8 @@ Ein intelligenter Snack-Automat Controller für Tyson über Arduino Nano 33 IoT 
 
 ## 🔧 Hardware Setup
 
-### Arduino Nano 33 IoT Code
-Der Arduino muss mit folgendem Code programmiert sein:
+### Arduino Uno R3 Code
+Der Arduino muss mit dem Code aus `tyson_pressure_plate.ino` programmiert sein. Das aktuelle Setup verwendet:
 
 ```cpp
 const int motorPins[] = {8, 9, 10, 11};
@@ -77,8 +80,11 @@ void loop() {
 ```
 
 ### Verkabelung
-- **Motor Pins 8-11**: Stepper Motor Anschlüsse
-- **USB**: Arduino Uno R3 an Raspberry Pi USB-Port
+- **Motor Pins 8-11**: 4-Draht Stepper Motor Anschlüsse (spezifische Reihenfolge beachten)
+- **Pin 2**: Test-Button (optional, INPUT Modus)
+- **Pin 3**: Tysons Drückerplatte (INPUT_PULLUP - Platte zwischen Pin 3 und GND)
+- **Pin 13**: Status-LED (eingebaute LED oder externe mit 220Ω Widerstand)
+- **USB**: Arduino Uno R3 an Raspberry Pi USB-Port (9600 Baud)
 
 ## 🚀 Installation & Start
 
@@ -149,6 +155,26 @@ Testet Arduino-Verbindung:
 }
 ```
 
+### POST /api/plate/toggle
+Drückerplatte sperren/entsperren:
+```json
+{
+  "success": true,
+  "message": "Drückerplatte entsperrt! 🟢",
+  "plate_enabled": true
+}
+```
+
+### GET /api/plate/status
+Status der Drückerplatte:
+```json
+{
+  "success": true,
+  "plate_enabled": false,
+  "message": "Drückerplatte gesperrt 🔴"
+}
+```
+
 ## 🔧 Konfiguration
 
 ### Umgebungsvariablen
@@ -167,10 +193,18 @@ Die App sucht automatisch nach Arduino auf folgenden Ports:
 ## 🐕 Verwendung
 
 1. **Snack ausgeben**: Großen orangenen Button drücken
-2. **🦴 Knochen-Regen genießen**: Nach erfolgreicher Ausgabe startet automatisch eine 4-sekündige Animation mit fallenden Knochen, Steaks und Fleisch in verschiedenen Größen und Animationsstilen
-3. **Status prüfen**: Arduino-Verbindung wird automatisch überwacht
-4. **Statistiken**: Anzahl ausgegebener Snacks und letzte Ausgabe
-5. **Mobile**: App auf Smartphone installieren für schnellen Zugriff
+2. **🐕 Drückerplatte kontrollieren**: Toggle-Button zum Entsperren/Sperren von Tysons Selbstbedienung
+3. **🔴 LED-Status beachten**: Status-LED (Pin 13) leuchtet wenn Platte entsperrt ist, bleibt AN auch beim Drücken
+4. **🦴 Knochen-Regen genießen**: Nach erfolgreicher Ausgabe startet automatisch eine 4-sekündige Animation mit fallenden Knochen, Steaks und Fleisch in verschiedenen Größen und Animationsstilen
+5. **Status prüfen**: Arduino-Verbindung wird automatisch überwacht
+6. **Statistiken**: Anzahl ausgegebener Snacks und letzte Ausgabe
+7. **Mobile**: App auf Smartphone installieren für schnellen Zugriff
+
+### Drückerplatte Details
+- **Standardzustand**: Platte ist beim Start gesperrt (LED aus)
+- **Entsperren**: 'p' Kommando oder Web-Interface Toggle (LED geht an)
+- **Sperren**: 'l' Kommando oder Web-Interface Toggle (LED geht aus)  
+- **Entprellung**: 100ms Verzögerung verhindert Fehlauslösungen
 
 ## 🛠️ Troubleshooting
 
@@ -199,14 +233,18 @@ PORT=5008 pm2 restart treat-commander
 
 ```
 treat-commander/
-├── server.py              # Flask Server
-├── requirements.txt       # Python Dependencies
-├── ecosystem.config.js    # PM2 Konfiguration
+├── server.py                 # Flask Server mit Thread-basierter Arduino Kommunikation
+├── tyson_pressure_plate.ino  # Arduino Firmware für Stepper Motor und Drückerplatte
+├── Makefile                  # Arduino Build-Konfiguration  
+├── requirements.txt          # Python Dependencies
+├── ecosystem.config.js       # PM2 Konfiguration
+├── CLAUDE.md                 # Entwickler-Dokumentation
 ├── public/
 │   ├── index.html         # Web Interface
 │   ├── manifest.json      # PWA Manifest
 │   ├── service-worker.js  # Service Worker
 │   └── *.png              # App Icons
+├── build-uno/             # Arduino Build-Artefakte
 ├── venv/                  # Virtual Environment
 └── logs/                  # PM2 Logs
 ```
